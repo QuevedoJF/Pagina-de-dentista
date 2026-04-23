@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { queries } from '../lib/db';
+
+const siteConfig = await queries.siteConfig.getAll();
+const config: Record<string, string> = {};
+siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
+
+const services = await queries.services.getActive();
+---
+
+<Layout title="Servicios">
+  <section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h1 class="section-title">Nuestros Servicios</h1>
+        <p class="section-subtitle mx-auto">Tratamientos dentales de alta calidad con tecnología de vanguardia</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {services.map((service: any) => (
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
+            {service.imagen_url && (
+              <div class="h-48 overflow-hidden">
+                <img src={service.imagen_url} alt={service.titulo} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              </div>
+            )}
+            <div class="p-6">
+              <span class="text-xs font-medium text-gold-600 uppercase tracking-wider">{service.categoria}</span>
+              <h3 class="text-xl font-display font-semibold text-gray-900 mt-2 mb-3">{service.titulo}</h3>
+              <p class="text-gray-600 text-sm mb-4">{service.descripcion}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-2xl font-bold text-gold-600">${service.precio}</span>
+                <a href="/contacto" class="text-primary-600 hover:text-primary-700 font-medium text-sm">Agendar →</a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

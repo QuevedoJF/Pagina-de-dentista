@@ -1,0 +1,105 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getSession } from '../../lib/auth';
+import { queries } from '../../lib/db';
+
+const session = await getSession(Astro);
+if (!session || session.rol !== 'admin') {
+  return Astro.redirect('/login');
+}
+
+let success = '';
+
+const items = await queries.services.getAll();
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action') as string;
+
+  if (action === 'create') {
+    await queries.services.create(
+      formData.get('titulo') as string,
+      formData.get('descripcion') as string,
+      parseFloat(formData.get('precio') as string) || 0,
+      formData.get('imagen_url') as string,
+      formData.get('categoria') as string,
+      parseInt(formData.get('orden') as string) || 0
+    );
+    success = 'Servicio creado';
+  } else if (action === 'delete') {
+    await queries.services.delete(parseInt(formData.get('id') as string));
+    success = 'Servicio eliminado';
+  }
+  return Astro.redirect('/admin/services');
+}
+---
+
+<AdminLayout title="Servicios - Admin">
+  <div class="min-h-screen bg-gray-100">
+    <nav class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+        <a href="/admin" class="text-gray-600 hover:text-gray-900">← Dashboard</a>
+        <h1 class="text-2xl font-display font-bold text-gray-900">Servicios y Costos</h1>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      {success && <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">{success}</div>}
+
+      <div class="grid lg:grid-cols-2 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-lg font-semibold mb-4">Agregar Servicio</h2>
+          <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="create" />
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+              <input type="text" name="titulo" required class="w-full px-4 py-2 border rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <textarea name="descripcion" rows="3" class="w-full px-4 py-2 border rounded-lg"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                <input type="number" name="precio" step="0.01" class="w-full px-4 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <input type="text" name="categoria" class="w-full px-4 py-2 border rounded-lg" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">URL Imagen</label>
+              <input type="url" name="imagen_url" class="w-full px-4 py-2 border rounded-lg" />
+            </div>
+            <button type="submit" class="btn-primary w-full">Crear Servicio</button>
+          </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-lg font-semibold mb-4">Servicios Actuales ({items.length})</h2>
+          <div class="space-y-4 max-h-[500px] overflow-y-auto">
+            {items.map((item: any) => (
+              <div class="p-4 border rounded-lg">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-medium text-gray-900">{item.titulo}</h3>
+                    <p class="text-sm text-gray-500">{item.categoria}</p>
+                    <p class="text-lg font-semibold text-gold-600">${item.precio}</p>
+                  </div>
+                  <form method="POST">
+                    <input type="hidden" name="action" value="delete" />
+                    <input type="hidden" name="id" value={item.id} />
+                    <button type="submit" class="text-red-600 hover:bg-red-50 px-3 py-1 rounded">Eliminar</button>
+                  </form>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">{item.descripcion?.substring(0, 100)}...</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</AdminLayout>

@@ -1,0 +1,34 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { queries } from '../lib/db';
+
+const promos = await queries.blogPromos.getByType('promocion');
+---
+
+<Layout title="Promociones">
+  <section class="py-20 bg-gradient-to-br from-gold-50 to-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h1 class="section-title">Promociones Especiales</h1>
+        <p class="section-subtitle mx-auto">Ofertas exclusivas para tu cuidado dental</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        {promos.length === 0 && <p class="text-gray-500 col-span-full text-center py-12">No hay promociones activas.</p>}
+        {promos.map((promo: any) => (
+          <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gold-200 relative overflow-hidden">
+            <div class="absolute top-0 right-0 bg-gold-600 text-white px-4 py-1 text-sm font-semibold">OFERTA</div>
+            {promo.imagen_url && (
+              <div class="h-48 -mx-8 -mt-8 mb-6 overflow-hidden">
+                <img src={promo.imagen_url} alt={promo.titulo} class="w-full h-full object-cover" />
+              </div>
+            )}
+            <h2 class="text-2xl font-display font-semibold text-gray-900 mb-4">{promo.titulo}</h2>
+            <div class="prose text-gray-600" set:html={promo.contenido} />
+            <a href="/contacto" class="btn-primary mt-6 inline-block">Aprovechar Ahora</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

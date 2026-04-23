@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { queries } from '../lib/db';
+
+const staff = await queries.staff.getActive();
+---
+
+<Layout title="Nuestro Equipo">
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h1 class="section-title">Nuestro Equipo</h1>
+        <p class="section-subtitle mx-auto">Profesionales comprometidos con tu sonrisa</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {staff.map((member: any) => (
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden text-center hover:shadow-xl transition-shadow">
+            <div class="h-64 overflow-hidden">
+              <img src={member.foto_url || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop'} alt={member.nombre} class="w-full h-full object-cover" />
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-display font-semibold text-gray-900">{member.nombre}</h3>
+              <p class="text-gold-600 font-medium">{member.cargo}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

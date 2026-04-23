@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { queries } from '../lib/db';
+
+const posts = await queries.blogPromos.getByType('post');
+---
+
+<Layout title="Blog">
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h1 class="section-title">Blog</h1>
+        <p class="section-subtitle mx-auto">Consejos y noticias sobre salud dental</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {posts.length === 0 && <p class="text-gray-500 col-span-full text-center py-12">No hay publicaciones aún.</p>}
+        {posts.map((post: any) => (
+          <article class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            {post.imagen_url && (
+              <div class="h-48 overflow-hidden">
+                <img src={post.imagen_url} alt={post.titulo} class="w-full h-full object-cover" />
+              </div>
+            )}
+            <div class="p-6">
+              <p class="text-sm text-gray-400 mb-2">{new Date(post.fecha_publicacion).toLocaleDateString('es-ES')}</p>
+              <h2 class="text-xl font-display font-semibold text-gray-900 mb-3">{post.titulo}</h2>
+              <p class="text-gray-600 text-sm">{post.contenido?.substring(0, 150)}...</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

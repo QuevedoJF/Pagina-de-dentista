@@ -1,0 +1,142 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getSession } from '../../lib/auth';
+import { queries } from '../../lib/db';
+
+const session = await getSession(Astro);
+if (!session || session.rol !== 'admin') {
+  return Astro.redirect('/login');
+}
+
+const stats = {
+  users: (await queries.users.getAll()).length,
+  reviews: (await queries.reviews.getActive()).length,
+  services: (await queries.services.getActive()).length,
+  staff: (await queries.staff.getActive()).length,
+  carousel: (await queries.carousel.getActive()).length,
+  posts: (await queries.blogPromos.getByType('post')).length,
+  promos: (await queries.blogPromos.getByType('promocion')).length,
+};
+---
+
+<AdminLayout title="Dashboard - Admin">
+  <div class="min-h-screen bg-gray-100">
+    <nav class="bg-white shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-display font-bold text-gray-900">Panel de Control</h1>
+        <div class="flex items-center gap-4">
+          <span class="text-gray-600">Bienvenido, {session?.nombre}</span>
+          <a href="/admin/logout" class="text-red-600 hover:text-red-700 font-medium">Cerrar Sesión</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <p class="text-sm text-gray-500 mb-1">Usuarios</p>
+          <p class="text-3xl font-bold text-gray-900">{stats.users}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <p class="text-sm text-gray-500 mb-1">Reseñas</p>
+          <p class="text-3xl font-bold text-gray-900">{stats.reviews}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <p class="text-sm text-gray-500 mb-1">Servicios</p>
+          <p class="text-3xl font-bold text-gray-900">{stats.services}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <p class="text-sm text-gray-500 mb-1">Staff</p>
+          <p class="text-3xl font-bold text-gray-900">{stats.staff}</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <a href="/admin/carousel" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Carrusel</h3>
+              <p class="text-sm text-gray-500">{stats.carousel} imágenes</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="/admin/services" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gold-100 rounded-lg flex items-center justify-center group-hover:bg-gold-200 transition-colors">
+              <svg class="w-6 h-6 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Servicios</h3>
+              <p class="text-sm text-gray-500">Gestionar precios</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="/admin/staff" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Staff</h3>
+              <p class="text-sm text-gray-500">{stats.staff} miembros</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="/admin/reviews" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Reseñas</h3>
+              <p class="text-sm text-gray-500">Moderación</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="/admin/blog" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Blog</h3>
+              <p class="text-sm text-gray-500">{stats.posts} posts</p>
+            </div>
+          </div>
+        </a>
+
+        <a href="/admin/config" class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Configuración</h3>
+              <p class="text-sm text-gray-500">Texto e imágenes</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </main>
+  </div>
+</Layout>

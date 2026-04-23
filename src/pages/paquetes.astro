@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { queries } from '../lib/db';
+
+const services = await queries.services.getActive();
+---
+
+<Layout title="Paquetes Dentales">
+  <section class="py-20 bg-gradient-to-br from-primary-900 to-gray-900 text-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">Paquetes Dentales</h1>
+        <p class="text-xl text-gray-300">Planes integrales para tu sonrisa perfecta</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+          <h3 class="text-2xl font-display font-semibold mb-4">Básico</h3>
+          <p class="text-gray-300 mb-6">Limpieza, revisión y-rays</p>
+          <ul class="space-y-3 text-sm mb-8">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Limpieza dental</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Examen completo</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Radiografías</li>
+          </ul>
+          <a href="/contacto" class="block text-center btn-secondary">Consultar</a>
+        </div>
+
+        <div class="bg-gold-600 rounded-2xl p-8 transform scale-105 shadow-2xl">
+          <span class="text-xs bg-white text-gold-700 px-3 py-1 rounded-full font-semibold">MÁS POPULAR</span>
+          <h3 class="text-2xl font-display font-semibold mb-4 mt-4">Premium</h3>
+          <p class="text-gold-100 mb-6">Todo lo del básico + blanqueamiento</p>
+          <ul class="space-y-3 text-sm mb-8">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Todo del paquete Básico</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Blanqueamiento</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Tratamiento desensibilizante</li>
+          </ul>
+          <a href="/contacto" class="block text-center btn-primary bg-white text-gold-700 hover:bg-gray-100">Consultar</a>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+          <h3 class="text-2xl font-display font-semibold mb-4">VIP</h3>
+          <p class="text-gray-300 mb-6">Transformación completa</p>
+          <ul class="space-y-3 text-sm mb-8">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Todo del paquete Premium</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Carillas o coronas</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-gold-400" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Seguimiento 1 año</li>
+          </ul>
+          <a href="/contacto" class="block text-center btn-secondary">Consultar</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
