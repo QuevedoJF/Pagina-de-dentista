@@ -2,39 +2,27 @@
 import Layout from '../layouts/Layout.astro';
 import { queries } from '../lib/db';
 
-const siteConfig = await queries.siteConfig.getAll();
-const config: Record<string, string> = {};
-siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
+const faqItems = await queries.faq.getAll();
 ---
 
 <Layout title="FAQ - Preguntas Frecuentes">
   <section class="py-20">
     <div class="max-w-4xl mx-auto px-6">
       <div class="text-center mb-16">
-        <h1 class="section-title">{config['faq_titulo'] || 'Preguntas Frecuentes'}</h1>
+        <h1 class="section-title">{Astro.locals.config?.['faq_titulo'] || 'Preguntas Frecuentes'}</h1>
       </div>
       <div class="space-y-4">
-        <details class="bg-white p-6 rounded-xl shadow-md group">
-          <summary class="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
-            ¿Cuáles son sus horarios de atención?
-            <svg class="w-6 h-6 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </summary>
-          <p class="mt-4 text-gray-600">Lunes a Viernes de 9:00 AM a 8:00 PM. Sábados de 9:00 AM a 2:00 PM.</p>
-        </details>
-        <details class="bg-white p-6 rounded-xl shadow-md group">
-          <summary class="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
-            ¿Aceptan seguros dentales?
-            <svg class="w-6 h-6 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </summary>
-          <p class="mt-4 text-gray-600">Sí, aceptamos la mayoría de seguros dentales. Consulte con nuestra recepción para verificar su cobertura.</p>
-        </details>
-        <details class="bg-white p-6 rounded-xl shadow-md group">
-          <summary class="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
-            ¿Ofrecen financiamiento?
-            <svg class="w-6 h-6 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </summary>
-          <p class="mt-4 text-gray-600">Sí, ofrecemos planes de financiamiento flexibles sin intereses para tratamientos mayores.</p>
-        </details>
+        {faqItems.length > 0 ? faqItems.map((item) => (
+          <details class="bg-white p-6 rounded-xl shadow-md group">
+            <summary class="font-semibold text-lg cursor-pointer list-none flex justify-between items-center">
+              {item.pregunta}
+              <svg class="w-6 h-6 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <p class="mt-4 text-gray-600">{item.respuesta}</p>
+          </details>
+        )) : (
+          <p class="text-center text-gray-500">No hay preguntas frecuentes agregadas aún.</p>
+        )}
       </div>
     </div>
   </section>

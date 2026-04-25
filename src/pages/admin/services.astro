@@ -80,7 +80,7 @@ if (Astro.request.method === 'POST') {
         <div class="bg-white p-6 rounded-xl shadow-md">
           <h2 class="text-lg font-semibold mb-4">Servicios Actuales ({items.length})</h2>
           <div class="space-y-4 max-h-[500px] overflow-y-auto">
-            {items.map((item: any) => (
+            {items.map((item: import('../../lib/db').Service) => (
               <div class="p-4 border rounded-lg">
                 <div class="flex justify-between items-start">
                   <div>

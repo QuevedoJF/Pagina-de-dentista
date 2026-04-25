@@ -20,7 +20,7 @@ if (Astro.request.method === 'POST') {
   } else if (password.length < 6) {
     error = 'La contraseña debe tener al menos 6 caracteres';
   } else {
-    const hashedPassword = hashPassword(password);
+    const hashedPassword = await hashPassword(password);
     try {
       await pool.query(
         'INSERT INTO users (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',

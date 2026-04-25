@@ -72,7 +72,7 @@ if (Astro.request.method === 'POST') {
         <div class="bg-white p-6 rounded-xl shadow-md">
           <h2 class="text-lg font-semibold mb-4">Equipo Actual ({items.length})</h2>
           <div class="space-y-4 max-h-[500px] overflow-y-auto">
-            {items.map((item: any) => (
+            {items.map((item: import('../../lib/db').Staff) => (
               <div class="flex items-center gap-4 p-4 border rounded-lg">
                 <img src={item.foto_url || '/images/default-avatar.png'} class="w-16 h-16 rounded-full object-cover" alt={item.nombre} />
                 <div class="flex-1">

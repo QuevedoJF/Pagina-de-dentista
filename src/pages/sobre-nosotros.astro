@@ -1,10 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { queries } from '../lib/db';
-
-const siteConfig = await queries.siteConfig.getAll();
-const config: Record<string, string> = {};
-siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
 ---
 
 <Layout title="Sobre Nosotros">
@@ -12,23 +7,23 @@ siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
     <div class="max-w-6xl mx-auto px-6">
       <div class="grid md:grid-cols-2 gap-16 items-center mb-20">
         <div>
-          <h1 class="section-title">{config['sobre_nosotros_titulo'] || 'Sobre Nosotros'}</h1>
-          <div class="prose prose-lg text-gray-600 mt-6" set:html={config['sobre_nosotros_contenido'] || ''} />
+          <h1 class="section-title">{Astro.locals.config?.['sobre_nosotros_titulo'] || 'Sobre Nosotros'}</h1>
+          <div class="prose prose-lg text-gray-600 mt-6" set:html={Astro.locals.config?.['sobre_nosotros_contenido'] || ''} />
         </div>
         <div class="relative">
-          <img src={config['sobre_nosotros_imagen'] || '/images/clinica.jpg'} alt="Nuestra clínica" class="rounded-2xl shadow-2xl w-full" />
+          <img src={Astro.locals.config?.['sobre_nosotros_imagen'] || '/images/clinica.jpg'} alt="Nuestra clínica" class="rounded-2xl shadow-2xl w-full" />
           <div class="absolute -bottom-6 -left-6 w-48 h-48 bg-gold-100 rounded-2xl -z-10"></div>
         </div>
       </div>
 
       <div class="grid md:grid-cols-2 gap-12">
         <div class="bg-gradient-to-br from-primary-50 to-white p-8 rounded-2xl">
-          <h2 class="text-3xl font-display font-semibold text-gray-900 mb-4">{config['mision_titulo'] || 'Nuestra Misión'}</h2>
-          <div class="prose text-gray-600" set:html={config['mision_contenido'] || ''} />
+          <h2 class="text-3xl font-display font-semibold text-gray-900 mb-4">{Astro.locals.config?.['mision_titulo'] || 'Nuestra Misión'}</h2>
+          <div class="prose text-gray-600" set:html={Astro.locals.config?.['mision_contenido'] || ''} />
         </div>
         <div class="bg-gradient-to-br from-gold-50 to-white p-8 rounded-2xl">
-          <h2 class="text-3xl font-display font-semibold text-gray-900 mb-4">{config['vision_titulo'] || 'Nuestra Visión'}</h2>
-          <div class="prose text-gray-600" set:html={config['vision_contenido'] || ''} />
+          <h2 class="text-3xl font-display font-semibold text-gray-900 mb-4">{Astro.locals.config?.['vision_titulo'] || 'Nuestra Visión'}</h2>
+          <div class="prose text-gray-600" set:html={Astro.locals.config?.['vision_contenido'] || ''} />
         </div>
       </div>
     </div>

@@ -128,6 +128,19 @@ CREATE TABLE site_config (
 CREATE INDEX idx_config_categoria ON site_config(categoria);
 
 -- -----------------------------------------------------
+-- TABLA: faq_items (Preguntas Frecuentes)
+-- -----------------------------------------------------
+CREATE TABLE faq_items (
+    id SERIAL PRIMARY KEY,
+    pregunta VARCHAR(500) NOT NULL,
+    respuesta TEXT NOT NULL,
+    orden INTEGER DEFAULT 0,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_faq_orden ON faq_items(orden);
+
+-- -----------------------------------------------------
 -- DATOS INICIALES: Admin por defecto
 -- -----------------------------------------------------
 INSERT INTO users (nombre, email, password, rol)
@@ -217,6 +230,15 @@ INSERT INTO blog_promos (tipo, titulo, contenido, imagen_url) VALUES
 ('post', '¿Qué es la Ortodoncia Invisible?', '<p>La ortodoncia invisible utiliza alineadores transparentes personalizados para corregir la posición de tus dientes de forma gradual y casi imperceptible. Es la opción ideal para adultos que buscan una sonrisa perfecta sin comprometer su apariencia.</p>', 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&h=400&fit=crop'),
 ('promocion', '20% de Descuento en Limpieza Dental', '<p>Por el mes de la salud dental, obtén un 20% de descuento en limpieza dental profunda. Incluye ultrasonido, pulido y flúor. Válido solo para nuevas citas durante todo el mes.</p>', 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&h=400&fit=crop'),
 ('promocion', 'Pack Sonrisa Perfecta - 30% OFF', '<p>Pack completo que incluye limpieza, blanqueamiento y carillas. Ahorra 30% cuando adquieras los tres tratamientos. Pago en cuotas sin intereses.</p>', 'https://images.unsplash.com/photo-1601262822501-336c4c2c0934?w=600&h=400&fit=crop');
+
+-- -----------------------------------------------------
+-- DATOS DE EJEMPLO: FAQ
+-- -----------------------------------------------------
+INSERT INTO faq_items (pregunta, respuesta, orden) VALUES
+('¿Cuáles son sus horarios de atención?', 'Lunes a Viernes de 9:00 AM a 8:00 PM. Sábados de 9:00 AM a 2:00 PM.', 1),
+('¿Aceptan seguros dentales?', 'Sí, aceptamos la mayoría de seguros dentales. Consulte con nuestra recepción para verificar su cobertura.', 2),
+('¿Ofrecen financiamiento?', 'Sí, ofrecemos planes de financiamiento flexibles sin intereses para tratamientos mayores.', 3),
+('¿Los tratamientos son dolorosos?', 'Utilizamos técnicas modernas y anestesia local para minimizar cualquier incomodidad. Su bienestar es nuestra prioridad.', 4);
 
 -- -----------------------------------------------------
 -- VERIFICACIÓN

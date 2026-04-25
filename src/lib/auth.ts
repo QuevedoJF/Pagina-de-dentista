@@ -1,3 +1,7 @@
+import bcrypt from 'bcryptjs';
+
+const SALT_ROUNDS = 12;
+
 export interface SessionUser {
   id: number;
   nombre: string;
@@ -5,7 +9,7 @@ export interface SessionUser {
   rol: 'admin' | 'user';
 }
 
-export function hashPassword(password: string): string {
+function oldHashPassword(password: string): string {
   let hash = 0;
   const str = password + 'clinica-salt-2024';
   for (let i = 0; i < str.length; i++) {
@@ -16,12 +20,23 @@ export function hashPassword(password: string): string {
   return Math.abs(hash).toString(16).padStart(8, '0') + str.length.toString(16);
 }
 
-export function verifyPassword(password: string, hashed: string): boolean {
-  return hashPassword(password) === hashed;
+function isOldHashFormat(hashed: string): boolean {
+  return /^[a-f0-9]{8}/.test(hashed) && hashed.length > 8;
 }
 
-export async function verifyPasswordAsync(password: string, hashed: string): Promise<boolean> {
-  return hashPassword(password) === hashed;
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+export async function verifyPassword(password: string, hashed: string): Promise<boolean> {
+  if (isOldHashFormat(hashed)) {
+    return oldHashPassword(password) === hashed;
+  }
+  return bcrypt.compare(password, hashed);
+}
+
+export function needsRehash(hashed: string): boolean {
+  return isOldHashFormat(hashed);
 }
 
 export async function getSession(context: { cookies: any }): Promise<SessionUser | null> {

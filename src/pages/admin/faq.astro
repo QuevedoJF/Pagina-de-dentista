@@ -1,0 +1,197 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getSession } from '../../lib/auth';
+import { queries } from '../../lib/db';
+import pool from '../../lib/db';
+
+const session = await getSession(Astro);
+if (!session || session.rol !== 'admin') {
+  return Astro.redirect('/login');
+}
+
+let success = '';
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action') as string;
+
+  if (action === 'save-title') {
+    await queries.siteConfig.upsert('faq_titulo', formData.get('faq_titulo') as string || '', 'text', 'faq');
+    success = 'Título guardado correctamente';
+  } else if (action === 'add') {
+    const pregunta = formData.get('pregunta') as string;
+    const respuesta = formData.get('respuesta') as string;
+    if (pregunta && respuesta) {
+      await queries.faq.create(pregunta, respuesta);
+      success = 'Pregunta agregada correctamente';
+    } else {
+      error = 'Todos los campos son requeridos';
+    }
+  } else if (action === 'delete') {
+    const id = parseInt(formData.get('id') as string);
+    if (id) {
+      await queries.faq.delete(id);
+      success = 'Pregunta eliminada';
+    }
+  } else if (action === 'update') {
+    const id = parseInt(formData.get('id') as string);
+    const pregunta = formData.get('pregunta') as string;
+    const respuesta = formData.get('respuesta') as string;
+    if (id && pregunta && respuesta) {
+      await queries.faq.update(id, pregunta, respuesta);
+      success = 'Pregunta actualizada';
+    }
+  }
+}
+
+const faqTitleResult = await pool.query("SELECT valor FROM site_config WHERE clave = 'faq_titulo'");
+const faqTitulo = faqTitleResult.rows[0]?.valor || '';
+
+const faqItems = await queries.faq.getAll();
+---
+
+<AdminLayout title="FAQ - Admin">
+  <div class="max-w-4xl">
+    <div class="mb-8">
+      <a href="/admin" class="text-gold-600 hover:text-gold-700 text-sm mb-2 inline-block">← Volver al Dashboard</a>
+      <h1 class="text-3xl font-bold text-gray-900">Sección FAQ</h1>
+      <p class="text-gray-600 mt-1">Gestiona las preguntas frecuentes de la página</p>
+    </div>
+
+    {success && (
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        {success}
+      </div>
+    )}
+
+    {error && (
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        {error}
+      </div>
+    )}
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Título de la Sección</h2>
+      <form method="POST" class="flex gap-4">
+        <input type="hidden" name="action" value="save-title" />
+        <input type="text" name="faq_titulo" value={faqTitulo} class="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Preguntas Frecuentes" />
+        <button type="submit" class="btn-primary">Guardar Título</button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Agregar Nueva Pregunta</h2>
+      <form method="POST" class="space-y-4">
+        <input type="hidden" name="action" value="add" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Pregunta</label>
+          <input type="text" name="pregunta" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="¿Cuáles son sus horarios?" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Respuesta</label>
+          <textarea name="respuesta" rows="3" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Lunes a Viernes de 9:00 AM a 8:00 PM..."></textarea>
+        </div>
+        <button type="submit" class="btn-success">
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Agregar Pregunta
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="p-6 border-b">
+        <h2 class="text-lg font-semibold text-gray-900">Preguntas Existentes ({faqItems.length})</h2>
+      </div>
+      
+      {faqItems.length === 0 ? (
+        <div class="p-8 text-center text-gray-500">
+          No hay preguntas agregadas todavía.
+        </div>
+      ) : (
+        <div class="divide-y divide-gray-200">
+          {faqItems.map((item) => (
+            <div class="p-6">
+              <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                  <h3 class="font-semibold text-gray-900 mb-2">{item.pregunta}</h3>
+                  <p class="text-gray-600">{item.respuesta}</p>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <button type="button" onclick={`openEditModal(${item.id}, '${encodeURIComponent(item.pregunta)}', '${encodeURIComponent(item.respuesta)}')`} class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                    Editar
+                  </button>
+                  <form method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta pregunta?')">
+                    <input type="hidden" name="action" value="delete" />
+                    <input type="hidden" name="id" value={item.id} />
+                    <button type="submit" class="btn-danger text-sm">
+                      Eliminar
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>
+
+<div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl p-6 w-full max-w-lg mx-4">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Editar Pregunta</h3>
+      <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form method="POST">
+      <input type="hidden" name="action" value="update" />
+      <input type="hidden" name="id" id="editId" />
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Pregunta</label>
+          <input type="text" name="pregunta" id="editPregunta" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Respuesta</label>
+          <textarea name="respuesta" id="editRespuesta" rows="3" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end mt-6">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary">
+          Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script is:inline>
+  function openEditModal(id, pregunta, respuesta) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editPregunta').value = decodeURIComponent(pregunta);
+    document.getElementById('editRespuesta').value = decodeURIComponent(respuesta);
+    document.getElementById('editModal').classList.remove('hidden');
+    document.getElementById('editModal').classList.add('flex');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+    document.getElementById('editModal').classList.remove('flex');
+  }
+
+  document.getElementById('editModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('editModal')) {
+      closeEditModal();
+    }
+  });
+</script>

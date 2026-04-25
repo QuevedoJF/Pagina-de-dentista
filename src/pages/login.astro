@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import pool from '../lib/db';
-import { getSession, createSessionCookie, hashPassword } from '../lib/auth';
+import { getSession, createSessionCookie, verifyPassword, needsRehash, hashPassword } from '../lib/auth';
 
 const existingSession = await getSession(Astro);
 if (existingSession) {
@@ -18,7 +18,11 @@ if (Astro.request.method === 'POST') {
   const result = await pool.query('SELECT * FROM users WHERE nombre = $1', [nombre]);
   const user = result.rows[0];
 
-  if (user && hashPassword(password) === user.password) {
+  if (user && await verifyPassword(password, user.password)) {
+    if (needsRehash(user.password)) {
+      const newHash = await hashPassword(password);
+      await pool.query('UPDATE users SET password = $1 WHERE id = $2', [newHash, user.id]);
+    }
     const sessionValue = createSessionCookie({ id: user.id, nombre: user.nombre, email: user.email, rol: user.rol });
     Astro.cookies.set('session', sessionValue, { path: '/', httpOnly: true, maxAge: 60 * 60 * 24 });
     return Astro.redirect(user.rol === 'admin' ? '/admin' : '/');

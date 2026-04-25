@@ -2,10 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import { queries } from '../lib/db';
 
-const siteConfig = await queries.siteConfig.getAll();
-const config: Record<string, string> = {};
-siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
-
 const services = await queries.services.getActive();
 ---
 
@@ -18,7 +14,7 @@ const services = await queries.services.getActive();
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {services.map((service: any) => (
+        {services.map((service: import('../lib/db').Service) => (
           <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
             {service.imagen_url && (
               <div class="h-48 overflow-hidden">

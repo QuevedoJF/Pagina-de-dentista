@@ -48,7 +48,7 @@ const pendingReviews = pendingResult.rows;
         <div class="space-y-4">
           {pendingReviews.length === 0 && <p class="text-gray-500 text-center py-8">No hay reseñas pendientes.</p>}
 
-          {pendingReviews.map((item: any) => (
+          {pendingReviews.map((item: import('../../lib/db').Review) => (
             <div class="p-4 border rounded-lg">
               <div class="flex items-start justify-between">
                 <div class="flex-1">

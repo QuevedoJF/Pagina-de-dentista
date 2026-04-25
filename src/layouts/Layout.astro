@@ -1,5 +1,6 @@
 ---
 import { getSession } from "../lib/auth";
+import { queries } from "../lib/db";
 
 interface Props {
   title: string;
@@ -11,6 +12,12 @@ const {
   description = "Clínica Dental de Lujo - Sonrisa Perfecta, Vida Perfecta",
 } = Astro.props;
 const session = await getSession(Astro);
+
+const siteConfig = await queries.siteConfig.getAll();
+const config: Record<string, string> = {};
+siteConfig.forEach((item) => { config[item.clave] = item.valor || ''; });
+
+Astro.locals.config = config;
 ---
 
 <!doctype html>
@@ -170,8 +177,7 @@ const session = await getSession(Astro);
               >
             </div>
             <p class="text-gray-400 leading-relaxed">
-              Clinica Dental de Lujo. Más de 15 años brindando sonrisas
-              perfectas a nuestros pacientes.
+              {config['footer_descripcion'] || 'Clinica Dental de Lujo. Más de 15 años brinda sonrisas perfectas a nuestros pacientes.'}
             </p>
           </div>
 
@@ -223,7 +229,7 @@ const session = await getSession(Astro);
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   ></path></svg
                 >
-                Av. Libertadores 1234, San Isidro
+                {config['footer_direccion'] || 'Av. Libertadores 1234, San Isidro'}
               </li>
               <li class="flex items-center gap-2">
                 <svg
@@ -238,7 +244,7 @@ const session = await getSession(Astro);
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   ></path></svg
                 >
-                +51 987 654 321
+                {config['footer_telefono'] || '+51 987 654 321'}
               </li>
               <li class="flex items-center gap-2">
                 <svg
@@ -253,7 +259,7 @@ const session = await getSession(Astro);
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   ></path></svg
                 >
-                contacto@clinica-dental.lux
+                {config['footer_email'] || 'contacto@clinica-dental.lux'}
               </li>
             </ul>
           </div>
@@ -262,7 +268,8 @@ const session = await getSession(Astro);
             <h4 class="text-lg font-semibold mb-6">Síguenos</h4>
             <div class="flex gap-4">
               <a
-                href="#"
+                href={config['footer_facebook'] || '#'}
+                target="_blank"
                 class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold-600 transition-all duration-300 hover:scale-110 hover:shadow-lg"
               >
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
@@ -272,7 +279,8 @@ const session = await getSession(Astro);
                 >
               </a>
               <a
-                href="#"
+                href={config['footer_instagram'] || '#'}
+                target="_blank"
                 class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gold-600 transition-all duration-300 hover:scale-110 hover:shadow-lg"
               >
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"

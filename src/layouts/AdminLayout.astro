@@ -1,9 +1,12 @@
 ---
+import { getSession } from "../lib/auth";
+
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
+const session = await getSession(Astro);
 ---
 
 <!doctype html>
@@ -17,7 +20,87 @@ const { title } = Astro.props;
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="font-sans bg-gray-100 text-gray-900 antialiased">
-    <slot />
+    <div class="min-h-screen flex">
+      <aside class="w-64 bg-gray-900 text-white flex flex-col">
+        <div class="p-6 border-b border-gray-800">
+          <h1 class="text-xl font-bold">Dental<span class="text-gold-500">Admin</span></h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+          <a href="/admin" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+          <a href="/admin/carousel" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Carrusel
+          </a>
+          <a href="/admin/services" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Servicios
+          </a>
+          <a href="/admin/staff" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Staff
+          </a>
+          <a href="/admin/reviews" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            Reseñas
+          </a>
+          <a href="/admin/blog" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+            Blog
+          </a>
+          
+          <div class="pt-4 mt-4 border-t border-gray-800">
+            <p class="px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">Contenido del Sitio</p>
+            <a href="/admin/inicio" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              Inicio (Hero)
+            </a>
+            <a href="/admin/resultados" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              Resultados
+            </a>
+            <a href="/admin/sobre-nosotros" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              Sobre Nosotros
+            </a>
+            <a href="/admin/cta" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              Llamado a la Acción
+            </a>
+            <a href="/admin/faq" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              FAQ
+            </a>
+            <a href="/admin/footer" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              Footer
+            </a>
+          </div>
+        </nav>
+        <div class="p-4 border-t border-gray-800">
+          <a href="/" class="flex items-center gap-3 px-4 py-2 text-gray-400 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Ver Sitio
+          </a>
+        </div>
+      </aside>
+      
+      <div class="flex-1 flex flex-col">
+        <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-900">{title}</h2>
+          <div class="flex items-center gap-4">
+            <span class="text-gray-600">{session?.nombre}</span>
+            <a href="/admin/logout" class="text-red-600 hover:text-red-700 font-medium text-sm">Cerrar Sesión</a>
+          </div>
+        </header>
+        
+        <main class="flex-1 p-8">
+          <slot />
+        </main>
+      </div>
+    </div>
   </body>
 </html>
 
@@ -33,6 +116,14 @@ const { title } = Astro.props;
 
     .btn-secondary {
       @apply px-6 py-3 bg-white text-gold-600 border-2 border-gold-600 font-medium rounded-lg transition-all duration-200 hover:bg-gold-50;
+    }
+
+    .btn-danger {
+      @apply px-4 py-2 bg-red-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-red-700;
+    }
+
+    .btn-success {
+      @apply px-4 py-2 bg-green-600 text-white font-medium rounded-lg transition-all duration-200 hover:bg-green-700;
     }
   }
 </style>

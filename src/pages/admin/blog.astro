@@ -76,7 +76,7 @@ if (Astro.request.method === 'POST') {
         <div class="bg-white p-6 rounded-xl shadow-md">
           <h2 class="text-lg font-semibold mb-4">Entradas Existentes ({posts.length})</h2>
           <div class="space-y-4 max-h-[500px] overflow-y-auto">
-            {posts.map((item: any) => (
+            {posts.map((item: import('../../lib/db').BlogPromo) => (
               <div class="p-4 border rounded-lg">
                 <div class="flex items-center gap-2 mb-2">
                   <span class={`text-xs px-2 py-1 rounded ${item.tipo === 'promocion' ? 'bg-gold-100 text-gold-700' : 'bg-blue-100 text-blue-700'}`}>

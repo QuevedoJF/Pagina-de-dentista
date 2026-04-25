@@ -5,10 +5,6 @@ import { getSession } from '../lib/auth';
 import ToothSlider from '../components/ui/ToothSlider.astro';
 
 const session = await getSession(Astro);
-const siteConfig = await queries.siteConfig.getAll();
-const config: Record<string, string> = {};
-siteConfig.forEach((item: any) => { config[item.clave] = item.valor; });
-
 const carouselItems = await queries.carousel.getActive();
 const reviews = await queries.reviews.getActive();
 const stats = await queries.reviews.getStats();
@@ -26,14 +22,14 @@ const stats = await queries.reviews.getStats();
     <div class="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
       <div class="animate-fade-in-up">
         <h1 class="text-5xl md:text-7xl font-display font-bold text-gray-900 mb-6 leading-tight">
-          {config['hero_titulo'] || 'Sonrisa Perfecta, Vida Perfecta'}
+          {Astro.locals.config?.['hero_titulo'] || 'Sonrisa Perfecta, Vida Perfecta'}
         </h1>
         <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-          {config['hero_subtitulo'] || 'Experimenta el cuidado dental de clase mundial'}
+          {Astro.locals.config?.['hero_subtitulo'] || 'Experimenta el cuidado dental de clase mundial'}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a href="/contacto" class="btn-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            {config['hero_cta'] || 'Agenda tu Cita'}
+            Agenda tu Cita
           </a>
           <a href="/servicios" class="btn-secondary text-lg px-8 py-4 hover:scale-105 transition-all duration-300">
             Ver Servicios
@@ -80,11 +76,16 @@ const stats = await queries.reviews.getStats();
   <section class="py-24 bg-gradient-to-b from-white via-gold-50 to-white">
     <div class="max-w-6xl mx-auto px-6">
       <div class="text-center mb-16">
-        <h2 class="section-title animate-fade-in-up">Transforma Tu Sonrisa</h2>
-        <p class="section-subtitle mx-auto animate-fade-in-up">Observa el resultado de nuestros tratamientos profesionales</p>
+        <h2 class="section-title animate-fade-in-up">{Astro.locals.config?.['resultados_titulo'] || 'Transforma Tu Sonrisa'}</h2>
+        <p class="section-subtitle mx-auto animate-fade-in-up">{Astro.locals.config?.['resultados_subtitulo'] || 'Observa el resultado de nuestros tratamientos profesionales'}</p>
       </div>
       <div class="transform hover:scale-[1.02] transition-transform duration-500">
-        <ToothSlider />
+        <ToothSlider 
+          dirtyImage={Astro.locals.config?.['resultados_antes_imagen']}
+          cleanImage={Astro.locals.config?.['resultados_despues_imagen']}
+          dirtyLabel={Astro.locals.config?.['resultados_antes_etiqueta'] || 'Dientes manchados'}
+          cleanLabel={Astro.locals.config?.['resultados_despues_etiqueta'] || 'Dientes blancos'}
+        />
       </div>
     </div>
   </section>
@@ -94,13 +95,15 @@ const stats = await queries.reviews.getStats();
     <div class="absolute top-0 right-0 w-96 h-96 bg-gold-100 rounded-full blur-3xl opacity-50"></div>
     <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center relative z-10">
       <div class="relative group">
-        <img src={config['sobre_nosotros_imagen'] || 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&h=400&fit=crop'} alt="Nuestra clínica" class="rounded-3xl shadow-2xl w-full transform group-hover:scale-[1.02] transition-transform duration-500" />
+        <img src={Astro.locals.config?.['sobre_nosotros_imagen'] || 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&h=400&fit=crop'} alt="Nuestra clínica" class="rounded-3xl shadow-2xl w-full transform group-hover:scale-[1.02] transition-transform duration-500" />
         <div class="absolute -bottom-6 -left-6 w-48 h-48 bg-gold-500 rounded-3xl -z-10 transform group-hover:scale-110 transition-transform duration-500"></div>
       </div>
       <div>
-        <h2 class="section-title">{config['sobre_nosotros_titulo'] || 'Sobre Nosotros'}</h2>
-        <div class="prose prose-lg text-gray-600 mt-6" set:html={config['sobre_nosotros_contenido'] || ''} />
-        <a href="/sobre-nosotros" class="btn-secondary mt-8 inline-block hover:scale-105 transition-transform duration-300">Conoce Más</a>
+        <h2 class="section-title">{Astro.locals.config?.['sobre_nosotros_titulo'] || 'Sobre Nosotros'}</h2>
+        <div class="prose prose-lg text-gray-600 mt-6" set:html={Astro.locals.config?.['sobre_nosotros_contenido'] || ''} />
+        <a href={Astro.locals.config?.['sobre_boton_enlace'] || '/sobre-nosotros'} class="btn-secondary mt-8 inline-block hover:scale-105 transition-transform duration-300">
+            {Astro.locals.config?.['sobre_boton_texto'] || 'Conoce Más'}
+          </a>
       </div>
     </div>
   </section>
@@ -153,8 +156,8 @@ const stats = await queries.reviews.getStats();
       <div class="absolute bottom-20 right-20 w-80 h-80 bg-gold-600 rounded-full blur-3xl opacity-30 animate-float"></div>
     </div>
     <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-      <h2 class="text-4xl md:text-5xl font-display font-bold mb-6 animate-fade-in-up">¿Listo Para Tu Nueva Sonrisa?</h2>
-      <p class="text-xl text-gray-300 mb-10 animate-fade-in-up">Agenda tu cita hoy y descubre la diferencia de un cuidado dental excepcional.</p>
+      <h2 class="text-4xl md:text-5xl font-display font-bold mb-6 animate-fade-in-up">{Astro.locals.config?.['cta_titulo'] || '¿Listo Para Tu Nueva Sonrisa?'}</h2>
+      <p class="text-xl text-gray-300 mb-10 animate-fade-in-up">{Astro.locals.config?.['cta_subtitulo'] || 'Agenda tu cita hoy y descubre la diferencia de un cuidado dental excepcional.'}</p>
       <a href="/contacto" class="btn-primary text-lg px-10 py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 animate-fade-in-up hover:shadow-2xl hover:scale-105 transition-all duration-300">
         Agenda Tu Cita
       </a>

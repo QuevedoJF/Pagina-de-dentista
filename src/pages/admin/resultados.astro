@@ -1,0 +1,119 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getSession } from '../../lib/auth';
+import pool from '../../lib/db';
+
+const session = await getSession(Astro);
+if (!session || session.rol !== 'admin') {
+  return Astro.redirect('/login');
+}
+
+let success = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  
+  await pool.query(`INSERT INTO site_config (clave, valor, tipo, categoria) 
+    VALUES 
+      ('resultados_titulo', $1, 'text', 'resultados'),
+      ('resultados_subtitulo', $2, 'text', 'resultados'),
+      ('resultados_antes_imagen', $3, 'image', 'resultados'),
+      ('resultados_antes_etiqueta', $4, 'text', 'resultados'),
+      ('resultados_despues_imagen', $5, 'image', 'resultados'),
+      ('resultados_despues_etiqueta', $6, 'text', 'resultados')
+    ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor`,
+    [
+      formData.get('resultados_titulo') as string || '',
+      formData.get('resultados_subtitulo') as string || '',
+      formData.get('resultados_antes_imagen') as string || '',
+      formData.get('resultados_antes_etiqueta') as string || '',
+      formData.get('resultados_despues_imagen') as string || '',
+      formData.get('resultados_despues_etiqueta') as string || ''
+    ]
+  );
+  success = 'Cambios guardados correctamente';
+}
+
+const config: Record<string, string> = {};
+const result = await pool.query('SELECT clave, valor FROM site_config WHERE categoria = $1', ['resultados']);
+result.rows.forEach(row => { config[row.clave] = row.valor || ''; });
+---
+
+<AdminLayout title="Resultados - Admin">
+  <div class="max-w-4xl">
+    <div class="mb-8">
+      <a href="/admin" class="text-gold-600 hover:text-gold-700 text-sm mb-2 inline-block">← Volver al Dashboard</a>
+      <h1 class="text-3xl font-bold text-gray-900">Sección Resultados (Comparador)</h1>
+      <p class="text-gray-600 mt-1">Edita el contenido del comparador de imágenes antes/después</p>
+    </div>
+
+    {success && (
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        {success}
+      </div>
+    )}
+
+    <form method="POST" class="space-y-6">
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Texto de la Sección</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+            <input type="text" name="resultados_titulo" value={config['resultados_titulo'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Transforma Tu Sonrisa" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Subtítulo</label>
+            <input type="text" name="resultados_subtitulo" value={config['resultados_subtitulo'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Observa el resultado de nuestros tratamientos profesionales" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Imagen "Antes" (Dientes manchados)</h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">URL de la imagen</label>
+            <input type="text" name="resultados_antes_imagen" value={config['resultados_antes_imagen'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="https://..." />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Etiqueta</label>
+            <input type="text" name="resultados_antes_etiqueta" value={config['resultados_antes_etiqueta'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Dientes manchados" />
+          </div>
+        </div>
+        
+        {config['resultados_antes_imagen'] && (
+          <img src={config['resultados_antes_imagen']} alt="Antes" class="mt-4 w-48 h-32 object-cover rounded-lg" />
+        )}
+      </div>
+
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Imagen "Después" (Dientes blancos)</h2>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">URL de la imagen</label>
+            <input type="text" name="resultados_despues_imagen" value={config['resultados_despues_imagen'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="https://..." />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Etiqueta</label>
+            <input type="text" name="resultados_despues_etiqueta" value={config['resultados_despues_etiqueta'] || ''} class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gold-500" placeholder="Dientes blancos" />
+          </div>
+        </div>
+        
+        {config['resultados_despues_imagen'] && (
+          <img src={config['resultados_despues_imagen']} alt="Después" class="mt-4 w-48 h-32 object-cover rounded-lg" />
+        )}
+      </div>
+
+      <button type="submit" class="w-full btn-primary py-4 text-lg">
+        Guardar Cambios
+      </button>
+    </form>
+  </div>
+</AdminLayout>

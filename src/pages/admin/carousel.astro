@@ -75,7 +75,7 @@ if (Astro.request.method === 'POST') {
           <h2 class="text-lg font-semibold mb-4">Imágenes Actuales ({items.length})</h2>
           <p class="text-sm text-gray-500 mb-4">Solo las primeras 5 imágenes visibles en el front.</p>
           <div class="space-y-4 max-h-96 overflow-y-auto">
-            {items.map((item: any) => (
+            {items.map((item: { id: number; imagen_url: string; titulo: string; subtitulo: string; orden: number; activo: boolean }) => (
               <div class="flex items-center gap-4 p-3 border rounded-lg">
                 <img src={item.imagen_url} alt="" class="w-20 h-12 object-cover rounded" />
                 <div class="flex-1">

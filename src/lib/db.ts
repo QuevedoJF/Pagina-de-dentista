@@ -2,22 +2,110 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
+// Leemos primero de process.env (para Vercel) y de import.meta.env (para tu Local)
+const dbHost = process.env.PG_HOST || import.meta.env.PG_HOST || 'localhost';
+const isLocal = dbHost === 'localhost' || dbHost === '127.0.0.1';
+
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'dentista',
-  user: 'postgres',
-  password: '1234',
+  host: dbHost,
+  port: parseInt(process.env.PG_PORT || import.meta.env.PG_PORT || '5432'),
+  database: process.env.PG_DATABASE || import.meta.env.PG_DATABASE,
+  user: process.env.PG_USER || import.meta.env.PG_USER,
+  password: process.env.PG_PASSWORD || import.meta.env.PG_PASSWORD,
+  ssl: isLocal ? false : { rejectUnauthorized: false },
+  max: 1,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
 });
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
+
+export default pool;
+
+export interface User {
+  id: number;
+  nombre: string;
+  email: string | null;
+  rol: 'admin' | 'user';
+  password: string;
+  fecha_creacion: Date;
+}
+
+export interface Review {
+  id: number;
+  user_id: number;
+  nombre_autor: string;
+  comentario: string;
+  estrellas: number;
+  activo: boolean;
+  fecha_creacion: Date;
+  usuario_nombre?: string;
+}
+
+export interface Staff {
+  id: number;
+  nombre: string;
+  cargo: string;
+  foto_url: string | null;
+  orden: number;
+  activo: boolean;
+}
+
+export interface Service {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  precio: number;
+  imagen_url: string | null;
+  categoria: string;
+  orden: number;
+  activo: boolean;
+}
+
+export interface BlogPromo {
+  id: number;
+  tipo: 'post' | 'promocion';
+  titulo: string;
+  contenido: string;
+  imagen_url: string | null;
+  visible: boolean;
+  fecha_publicacion: Date;
+}
+
+export interface SiteConfig {
+  clave: string;
+  valor: string;
+  tipo: string;
+  categoria: string;
+}
+
+export interface FaqItem {
+  id: number;
+  pregunta: string;
+  respuesta: string;
+  orden: number;
+}
+
+export interface ReviewStats {
+  total: string;
+  promedio: string;
+}
 
 export const queries = {
   users: {
     findByNombre: async (nombre: string) => {
-      const result = await pool.query('SELECT * FROM users WHERE nombre = $1', [nombre]);
+      const result = await pool.query<User>(
+        'SELECT * FROM users WHERE nombre = $1',
+        [nombre]
+      );
       return result.rows[0] || null;
     },
     getAll: async () => {
-      const result = await pool.query('SELECT id, nombre, email, rol, fecha_creacion FROM users ORDER BY fecha_creacion DESC');
+      const result = await pool.query<User>(
+        'SELECT id, nombre, email, rol, fecha_creacion FROM users ORDER BY fecha_creacion DESC'
+      );
       return result.rows;
     },
     updatePassword: async (id: number, hashedPassword: string) => {
@@ -26,15 +114,22 @@ export const queries = {
   },
   reviews: {
     getActive: async () => {
-      const result = await pool.query("SELECT r.*, u.nombre as usuario_nombre FROM reviews r LEFT JOIN users u ON r.user_id = u.id WHERE r.activo = true ORDER BY r.fecha_creacion DESC");
+      const result = await pool.query<Review>(
+        "SELECT r.*, u.nombre as usuario_nombre FROM reviews r LEFT JOIN users u ON r.user_id = u.id WHERE r.activo = true ORDER BY r.fecha_creacion DESC"
+      );
       return result.rows;
     },
     getAll: async () => {
-      const result = await pool.query("SELECT r.*, u.nombre as usuario_nombre FROM reviews r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.fecha_creacion DESC");
+      const result = await pool.query<Review>(
+        "SELECT r.*, u.nombre as usuario_nombre FROM reviews r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.fecha_creacion DESC"
+      );
       return result.rows;
     },
-    create: async (userId: any, nombreAutor: string, comentario: string, estrellas: number) => {
-      await pool.query('INSERT INTO reviews (user_id, nombre_autor, comentario, estrellas) VALUES ($1, $2, $3, $4)', [userId, nombreAutor, comentario, estrellas]);
+    create: async (userId: number, nombreAutor: string, comentario: string, estrellas: number) => {
+      await pool.query(
+        'INSERT INTO reviews (user_id, nombre_autor, comentario, estrellas) VALUES ($1, $2, $3, $4)',
+        [userId, nombreAutor, comentario, estrellas]
+      );
     },
     delete: async (id: number) => {
       await pool.query('UPDATE reviews SET activo = false WHERE id = $1', [id]);
@@ -43,17 +138,19 @@ export const queries = {
       await pool.query('UPDATE reviews SET activo = true WHERE id = $1', [id]);
     },
     getStats: async () => {
-      const result = await pool.query("SELECT COUNT(*) as total, AVG(estrellas) as promedio FROM reviews");
-      return result.rows[0] || { total: 0, promedio: 0 };
+      const result = await pool.query<ReviewStats>(
+        "SELECT COUNT(*) as total, AVG(estrellas) as promedio FROM reviews"
+      );
+      return result.rows[0] || { total: '0', promedio: '0' };
     },
   },
   staff: {
     getActive: async () => {
-      const result = await pool.query('SELECT * FROM staff WHERE activo = true ORDER BY orden ASC');
+      const result = await pool.query<Staff>('SELECT * FROM staff WHERE activo = true ORDER BY orden ASC');
       return result.rows;
     },
     getAll: async () => {
-      const result = await pool.query('SELECT * FROM staff ORDER BY orden ASC');
+      const result = await pool.query<Staff>('SELECT * FROM staff ORDER BY orden ASC');
       return result.rows;
     },
     create: async (nombre: string, cargo: string, fotoUrl: string, orden: number) => {
@@ -65,15 +162,18 @@ export const queries = {
   },
   services: {
     getActive: async () => {
-      const result = await pool.query('SELECT * FROM services_costs WHERE activo = true ORDER BY orden ASC');
+      const result = await pool.query<Service>('SELECT * FROM services_costs WHERE activo = true ORDER BY orden ASC');
       return result.rows;
     },
     getAll: async () => {
-      const result = await pool.query('SELECT * FROM services_costs ORDER BY orden ASC');
+      const result = await pool.query<Service>('SELECT * FROM services_costs ORDER BY orden ASC');
       return result.rows;
     },
     create: async (titulo: string, descripcion: string, precio: number, imagenUrl: string, categoria: string, orden: number) => {
-      await pool.query('INSERT INTO services_costs (titulo, descripcion, precio, imagen_url, categoria, orden) VALUES ($1, $2, $3, $4, $5, $6)', [titulo, descripcion, precio, imagenUrl, categoria, orden]);
+      await pool.query(
+        'INSERT INTO services_costs (titulo, descripcion, precio, imagen_url, categoria, orden) VALUES ($1, $2, $3, $4, $5, $6)',
+        [titulo, descripcion, precio, imagenUrl, categoria, orden]
+      );
     },
     delete: async (id: number) => {
       await pool.query('DELETE FROM services_costs WHERE id = $1', [id]);
@@ -96,16 +196,22 @@ export const queries = {
     },
   },
   blogPromos: {
-    getByType: async (tipo: string) => {
-      const result = await pool.query('SELECT * FROM blog_promos WHERE tipo = $1 AND visible = true ORDER BY fecha_publicacion DESC', [tipo]);
+    getByType: async (tipo: 'post' | 'promocion') => {
+      const result = await pool.query<BlogPromo>(
+        'SELECT * FROM blog_promos WHERE tipo = $1 AND visible = true ORDER BY fecha_publicacion DESC',
+        [tipo]
+      );
       return result.rows;
     },
     getAll: async () => {
-      const result = await pool.query('SELECT * FROM blog_promos ORDER BY fecha_publicacion DESC');
+      const result = await pool.query<BlogPromo>('SELECT * FROM blog_promos ORDER BY fecha_publicacion DESC');
       return result.rows;
     },
     create: async (tipo: string, titulo: string, contenido: string, imagenUrl: string, visible: number) => {
-      await pool.query('INSERT INTO blog_promos (tipo, titulo, contenido, imagen_url, visible) VALUES ($1, $2, $3, $4, $5)', [tipo, titulo, contenido, imagenUrl, visible]);
+      await pool.query(
+        'INSERT INTO blog_promos (tipo, titulo, contenido, imagen_url, visible) VALUES ($1, $2, $3, $4, $5)',
+        [tipo, titulo, contenido, imagenUrl, visible]
+      );
     },
     delete: async (id: number) => {
       await pool.query('DELETE FROM blog_promos WHERE id = $1', [id]);
@@ -113,13 +219,35 @@ export const queries = {
   },
   siteConfig: {
     getAll: async () => {
-      const result = await pool.query('SELECT * FROM site_config ORDER BY categoria, clave');
+      const result = await pool.query<SiteConfig>('SELECT * FROM site_config ORDER BY categoria, clave');
       return result.rows;
     },
     upsert: async (clave: string, valor: string, tipo: string, categoria: string) => {
-      await pool.query('INSERT INTO site_config (clave, valor, tipo, categoria) VALUES ($1, $2, $3, $4) ON CONFLICT (clave) DO UPDATE SET valor = $2, tipo = $3, categoria = $4', [clave, valor, tipo, categoria]);
+      await pool.query(
+        'INSERT INTO site_config (clave, valor, tipo, categoria) VALUES ($1, $2, $3, $4) ON CONFLICT (clave) DO UPDATE SET valor = $2, tipo = $3, categoria = $4',
+        [clave, valor, tipo, categoria]
+      );
+    },
+  },
+  faq: {
+    getAll: async () => {
+      const result = await pool.query<FaqItem>('SELECT id, pregunta, respuesta, orden FROM faq_items ORDER BY orden ASC');
+      return result.rows;
+    },
+    create: async (pregunta: string, respuesta: string) => {
+      const maxOrder = await pool.query<{ next_order: number }>('SELECT COALESCE(MAX(orden), 0) + 1 as next_order FROM faq_items');
+      const orden = maxOrder.rows[0]?.next_order || 1;
+      await pool.query('INSERT INTO faq_items (pregunta, respuesta, orden) VALUES ($1, $2, $3)', [pregunta, respuesta, orden]);
+    },
+    delete: async (id: number) => {
+      await pool.query('DELETE FROM faq_items WHERE id = $1', [id]);
+    },
+    getById: async (id: number) => {
+      const result = await pool.query<FaqItem>('SELECT id, pregunta, respuesta, orden FROM faq_items WHERE id = $1', [id]);
+      return result.rows[0] || null;
+    },
+    update: async (id: number, pregunta: string, respuesta: string) => {
+      await pool.query('UPDATE faq_items SET pregunta = $1, respuesta = $2 WHERE id = $3', [pregunta, respuesta, id]);
     },
   },
 };
-
-export default pool;
